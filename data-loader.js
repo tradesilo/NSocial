@@ -8,7 +8,7 @@ class DataLoader {
         this.rawData = null;
         this.processedData = null;
         this.isLoading = false;
-           this.dataUrl = 'https://n-social-data.vercel.app/';
+                this.dataUrl = 'https://n-social-data.vercel.app/';
     }
 
     /**
@@ -281,3 +281,4 @@ class DataLoader {
 // Export for use in other modules
 
 window.DataLoader = DataLoader;
+
