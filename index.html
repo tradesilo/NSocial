@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSocial</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        .filter-card {
+            transition: all 0.3s ease;
+        }
+        .filter-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .member-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .member-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .tag-chip {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        }
+        .search-container {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-network-wired text-black mr-2"></i>
+                        NSocial
+                    </h1>
+                </div>
+                <div class="text-sm text-gray-500" id="member-count">
+                    Loading community data...
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Search Section -->
+        <div class="search-container rounded-2xl p-8 mb-8 text-white">
+            <h2 class="text-3xl font-bold mb-4">Discover Your Network School Community</h2>
+            <p class="text-lg mb-6">Find members by location, profession, interests, or use natural language search to discover your tribe.</p>
+            
+            <!-- Search Bar -->
+            <div class="relative mb-6">
+                <input type="text" id="search-input" 
+                       placeholder="Search for 'web3 developers in Singapore' or 'climate change enthusiasts'..."
+                       class="w-full px-6 py-4 text-gray-900 rounded-xl border-0 focus:ring-4 focus:ring-white focus:ring-opacity-50 text-lg">
+                <button id="search-btn" class="absolute right-3 top-3 bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold" id="total-members">-</div>
+                    <div class="text-sm opacity-90">Total Members</div>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold" id="total-locations">-</div>
+                    <div class="text-sm opacity-90">Locations</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <!-- Sidebar Filters -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm p-6 sticky top-8">
+                    <h3 class="text-xl font-semibold mb-6 text-gray-900">
+                        <i class="fas fa-filter text-black mr-2"></i>
+                        Filters
+                    </h3>
+
+                    <!-- Location Filter -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <select id="location-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent">
+                            <option value="">All Locations</option>
+                        </select>
+                    </div>
+
+                    <!-- Profession Filter -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Profession/Industry</label>
+                        <select id="profession-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent">
+                            <option value="">All Professions</option>
+                        </select>
+                    </div>
+
+                    <!-- Tags Filter -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Skills & Interests</label>
+                        <div id="tags-container" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+                            <!-- Tags will be populated here -->
+                        </div>
+                    </div>
+
+
+
+                    <!-- Clear Filters -->
+                    <button id="clear-filters" class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Clear All Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="lg:col-span-3">
+                
+                <!-- Results Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            <span id="results-count">0</span> Members Found
+                        </h3>
+                        <p class="text-gray-600" id="results-description">Showing all Network School members</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <!-- View Toggle -->
+                        <div class="flex bg-gray-100 rounded-lg p-1">
+                            <button id="grid-view" class="px-3 py-1 rounded-md text-sm font-medium bg-white text-gray-900 shadow-sm">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button id="list-view" class="px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Sort -->
+                        <select id="sort-select" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black text-sm">
+                            <option value="recent">Most Recent</option>
+                            <option value="name">Name (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loading-state" class="text-center py-12">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Loading community members...</p>
+                </div>
+
+                <!-- Results Grid -->
+                <div id="results-container" class="hidden">
+                    <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Member cards will be populated here -->
+                    </div>
+                </div>
+
+                <!-- No Results State -->
+                <div id="no-results" class="hidden text-center py-12">
+                    <i class="fas fa-search text-gray-300 text-6xl mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No members found</h3>
+                    <p class="text-gray-600 mb-4">Try adjusting your filters or search terms</p>
+                    <button id="reset-search" class="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        Reset Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Member Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-90vh overflow-y-auto">
+            <div id="profile-content">
+                <!-- Profile content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/search-engine.js"></script>
+    <script src="js/ui-components.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

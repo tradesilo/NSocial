@@ -1,0 +1,31 @@
+# Development files
+*.bat
+*.ps1
+start-server.*
+run-*
+
+# Large local data files (using hosted version instead)
+intro_embeddings_openai.json
+
+# Development tools
+*_cleaner.*
+setup-local-db.html
+convert-to-json.html
+
+# Python files (not needed for frontend deployment)
+*.py
+requirements.txt
+
+# IDE and OS files
+.DS_Store
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
